@@ -12,13 +12,3 @@ This project includes a **"Write your message tester"** panel directly under the
 
 ```bash
 VITE_TELEGRAM_CHAT_ID=your_chat_id
-```
-
-> Tip: Open Telegram and send your bot at least one message first.
-
-## Run locally
-
-```bash
-npm install
-npm run dev
-```
