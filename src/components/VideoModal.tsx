@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import MessageTester from "@/components/MessageTester";
 
 interface VideoModalProps {
   open: boolean;
@@ -33,7 +34,7 @@ const VideoModal = ({ open, onClose }: VideoModalProps) => {
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-sm overflow-hidden rounded-[2rem] bg-card shadow-2xl animate-scale-in"
+        className="relative flex max-h-[85vh] w-full max-w-sm flex-col overflow-y-auto rounded-[2rem] bg-card shadow-2xl animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         <video
@@ -41,8 +42,11 @@ const VideoModal = ({ open, onClose }: VideoModalProps) => {
           src="/reveal-video-mobile.mp4"
           playsInline
           preload="auto"
-          className="block w-full"
+          controls={false}
+          disablePictureInPicture
+          className="no-video-controls block w-full flex-shrink-0"
         />
+        <MessageTester />
         <button
           onClick={onClose}
           aria-label="Close video"
