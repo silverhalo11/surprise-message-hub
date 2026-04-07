@@ -8,6 +8,7 @@ interface VideoModalProps {
 
 const VideoModal = ({ open, onClose }: VideoModalProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open || !videoRef.current) return;
@@ -28,25 +29,42 @@ const VideoModal = ({ open, onClose }: VideoModalProps) => {
 
   if (!open) return null;
 
+  const scrollToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 px-4 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="relative flex max-h-[85vh] w-full max-w-sm flex-col overflow-y-auto rounded-[2rem] bg-card shadow-2xl animate-scale-in"
+        className="relative flex max-h-[88vh] w-full max-w-sm flex-col overflow-y-auto rounded-[2rem] bg-card shadow-2xl animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
-        <video
-          ref={videoRef}
-          src="/reveal-video-mobile.mp4"
-          playsInline
-          preload="auto"
-          controls={false}
-          disablePictureInPicture
-          className="no-video-controls block w-full flex-shrink-0"
-        />
-        <MessageTester />
+        <div className="relative">
+          <video
+            ref={videoRef}
+            src="/reveal-video-mobile.mp4"
+            playsInline
+            preload="auto"
+            controls={false}
+            disablePictureInPicture
+            className="no-video-controls block max-h-[58vh] w-full object-cover"
+          />
+          <button
+            type="button"
+            onClick={scrollToForm}
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-background/90 px-4 py-2 text-xs font-semibold text-foreground shadow"
+          >
+            Write message ↓
+          </button>
+        </div>
+
+        <div ref={formRef} className="flex-shrink-0">
+          <MessageTester />
+        </div>
+
         <button
           onClick={onClose}
           aria-label="Close video"
