@@ -9,16 +9,3 @@ This project includes a **"Write your message tester"** panel directly under the
 
 ```bash
 VITE_TELEGRAM_CHAT_ID=your_chat_id
-```
-
-- The tester now requires a **name** and a **message** before sending.
-- The chat id is intentionally hidden from the UI.
-
-> Tip: Start a conversation with your bot first, then use your numeric user/group chat id.
-
-## Run locally
-
-```bash
-npm install
-npm run dev
-```

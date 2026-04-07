@@ -43,6 +43,7 @@ const VideoModal = ({ open, onClose }: VideoModalProps) => {
           playsInline
           preload="auto"
           className="block w-full"
+          controls
         />
         <MessageTester />
         <button
