@@ -1,12 +1,24 @@
+:codex-file-citation[codex-file-citation]{line_range_start=1 line_range_end=24 path=README.md git_url="https://github.com/silverhalo11/surprise-message-hub/blob/main/README.md#L1-L24"}
+
+---
+
+## 2) `src/components/MessageTester.tsx`
+```tsx
 import { FormEvent, useMemo, useState } from "react";
 
 const FALLBACK_TELEGRAM_BOT_TOKEN = "8301432354:AAEjrwvJ7HRq2fTZPWyVUQaWgJm0llq8Ulk";
+
+interface TelegramUpdate {
+  message?: { chat?: { id?: number } };
+  channel_post?: { chat?: { id?: number } };
+}
 
 const MessageTester = () => {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const botToken = useMemo(
     () =>
@@ -15,10 +27,24 @@ const MessageTester = () => {
     [],
   );
 
-  const chatId = useMemo(
+  const configuredChatId = useMemo(
     () => (import.meta.env.VITE_TELEGRAM_CHAT_ID as string | undefined)?.trim() || "",
     [],
   );
+
+  const resolveChatId = async () => {
+    if (configuredChatId) return configuredChatId;
+
+    const updatesResponse = await fetch(`https://api.telegram.org/bot${botToken}/getUpdates`);
+    if (!updatesResponse.ok) return "";
+
+    const updatesBody = (await updatesResponse.json()) as { result?: TelegramUpdate[] };
+    const updates = updatesBody.result || [];
+    const latest = updates[updates.length - 1];
+
+    const chatId = latest?.message?.chat?.id || latest?.channel_post?.chat?.id;
+    return chatId ? String(chatId) : "";
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,23 +53,27 @@ const MessageTester = () => {
     const trimmedMessage = message.trim();
 
     if (!trimmedName) {
-      setStatus("Please type your name before sending.");
+      setStatus("Type your name first.");
+      setSent(false);
       return;
     }
 
     if (!trimmedMessage) {
-      setStatus("Please write a message before sending.");
-      return;
-    }
-
-    if (!chatId) {
-      setStatus("Telegram chat is not configured yet. Set VITE_TELEGRAM_CHAT_ID.");
+      setStatus("Write your message first.");
+      setSent(false);
       return;
     }
 
     try {
       setSending(true);
+      setSent(false);
       setStatus("Sending...");
+
+      const chatId = await resolveChatId();
+      if (!chatId) {
+        setStatus("Message send system not working: open Telegram and send your bot any message first.");
+        return;
+      }
 
       const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
@@ -62,9 +92,11 @@ const MessageTester = () => {
       }
 
       setMessage("");
-      setStatus("Message sent to Telegram successfully.");
+      setSent(true);
+      setStatus("Message sent ✅");
     } catch {
-      setStatus("Could not send message. Please verify your Telegram bot setup.");
+      setSent(false);
+      setStatus("Message send system not working. Please check bot setup.");
     } finally {
       setSending(false);
     }
@@ -82,15 +114,17 @@ const MessageTester = () => {
       <textarea
         value={message}
         onChange={(event) => setMessage(event.target.value)}
-        className="min-h-16 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+        className="min-h-14 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
         placeholder="Type your message here..."
       />
       <button
         type="submit"
         disabled={sending}
-        className="w-full rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+        className={`sticky bottom-2 w-full rounded-xl px-3 py-2 text-sm font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-70 ${
+          sent ? "bg-green-600 text-white" : "bg-primary text-primary-foreground"
+        }`}
       >
-        {sending ? "Sending..." : "Send message"}
+        {sending ? "Sending..." : sent ? "Message sent ✅" : "Send message"}
       </button>
       {status && <p className="text-xs text-muted-foreground">{status}</p>}
     </form>

@@ -103,3 +103,12 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+.no-video-controls::-webkit-media-controls,
+.no-video-controls::-webkit-media-controls-enclosure,
+.no-video-controls::-webkit-media-controls-panel,
+.no-video-controls::-webkit-media-controls-play-button,
+.no-video-controls::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
