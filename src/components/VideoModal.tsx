@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import MessageTester from "@/components/MessageTester";
 
 interface VideoModalProps {
   open: boolean;
@@ -43,6 +44,7 @@ const VideoModal = ({ open, onClose }: VideoModalProps) => {
           preload="auto"
           className="block w-full"
         />
+        <MessageTester />
         <button
           onClick={onClose}
           aria-label="Close video"
