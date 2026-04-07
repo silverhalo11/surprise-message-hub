@@ -28,9 +28,10 @@ const VideoModal = ({ open, onClose }: VideoModalProps) => {
         <video
           ref={videoRef}
           src="/reveal-video.mp4"
-          controls
+          autoPlay
           playsInline
-          className="w-full"
+          className="w-full rounded-2xl"
+          style={{ objectFit: "cover" }}
         />
         <button
           onClick={onClose}
