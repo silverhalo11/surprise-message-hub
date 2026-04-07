@@ -1,40 +1,52 @@
-import { useEffect, useRef, RefObject } from "react";
+import { useEffect, useRef } from "react";
 
 interface VideoModalProps {
   open: boolean;
   onClose: () => void;
-  preloadedVideoRef: RefObject<HTMLVideoElement>;
 }
 
-const VideoModal = ({ open, onClose, preloadedVideoRef }: VideoModalProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const VideoModal = ({ open, onClose }: VideoModalProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (open && preloadedVideoRef.current && containerRef.current) {
-      const video = preloadedVideoRef.current;
-      video.className = "w-full rounded-2xl";
-      video.style.objectFit = "cover";
-      containerRef.current.prepend(video);
-      video.currentTime = 0;
-      video.play();
-    }
-  }, [open, preloadedVideoRef]);
+    if (!open || !videoRef.current) return;
+
+    const video = videoRef.current;
+    video.currentTime = 0;
+
+    const playVideo = async () => {
+      try {
+        await video.play();
+      } catch {
+        // Ignore autoplay interruptions after mount.
+      }
+    };
+
+    void playVideo();
+  }, [open]);
 
   if (!open) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 backdrop-blur-sm animate-fade-in px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 px-4 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
-        ref={containerRef}
-        className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl animate-scale-in bg-card"
+        className="relative w-full max-w-sm overflow-hidden rounded-[2rem] bg-card shadow-2xl animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
+        <video
+          ref={videoRef}
+          src="/reveal-video-mobile.mp4"
+          playsInline
+          preload="auto"
+          className="block w-full"
+        />
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-foreground/50 text-background flex items-center justify-center text-sm font-bold hover:bg-foreground/70 transition-colors"
+          aria-label="Close video"
+          className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-foreground/50 text-background transition-colors hover:bg-foreground/70"
         >
           ✕
         </button>

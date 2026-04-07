@@ -1,48 +1,64 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState } from "react";
 import RevealCard from "@/components/RevealCard";
 import VideoModal from "@/components/VideoModal";
 
+const MIN_WAIT_SECONDS = 3;
+
 const Index = () => {
   const [showVideo, setShowVideo] = useState(false);
-  const [ready, setReady] = useState(false);
-  const [countdown, setCountdown] = useState(3);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoReady, setVideoReady] = useState(false);
+  const [timerDone, setTimerDone] = useState(false);
+  const [countdown, setCountdown] = useState(MIN_WAIT_SECONDS);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (video) video.load();
+    const preloadVideo = document.createElement("video");
+    preloadVideo.src = "/reveal-video-mobile.mp4";
+    preloadVideo.preload = "auto";
+    preloadVideo.playsInline = true;
+    preloadVideo.muted = true;
 
-    const interval = setInterval(() => {
+    const handleReady = () => setVideoReady(true);
+    preloadVideo.addEventListener("loadeddata", handleReady, { once: true });
+    preloadVideo.load();
+
+    const interval = window.setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          clearInterval(interval);
-          setReady(true);
+          window.clearInterval(interval);
+          setTimerDone(true);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      window.clearInterval(interval);
+      preloadVideo.removeEventListener("loadeddata", handleReady);
+      preloadVideo.pause();
+      preloadVideo.src = "";
+      preloadVideo.load();
+    };
   }, []);
+
+  const ready = timerDone && videoReady;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <video ref={videoRef} src="/reveal-video.mp4" preload="auto" playsInline className="hidden" />
-
-      {!showVideo && (
-        ready ? (
+      {!showVideo &&
+        (ready ? (
           <RevealCard onReveal={() => setShowVideo(true)} />
         ) : (
-          <div className="flex flex-col items-center gap-6 animate-pulse">
-            <div className="w-20 h-20 rounded-full border-4 border-primary/30 flex items-center justify-center">
-              <span className="text-primary text-3xl font-bold">{countdown}</span>
+          <div className="flex flex-col items-center gap-6">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-primary/30">
+              <span className="text-3xl font-bold text-primary">{countdown}</span>
             </div>
-            <p className="text-muted-foreground text-sm">Preparing something special…</p>
+            <p className="text-sm text-muted-foreground">
+              {videoReady ? "Almost ready…" : "Loading video in background…"}
+            </p>
           </div>
-        )
-      )}
-      <VideoModal open={showVideo} onClose={() => setShowVideo(false)} preloadedVideoRef={videoRef} />
+        ))}
+      <VideoModal open={showVideo} onClose={() => setShowVideo(false)} />
     </div>
   );
 };
