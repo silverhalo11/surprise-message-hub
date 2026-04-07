@@ -1,18 +1,24 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, RefObject } from "react";
 
 interface VideoModalProps {
   open: boolean;
   onClose: () => void;
+  preloadedVideoRef: RefObject<HTMLVideoElement>;
 }
 
-const VideoModal = ({ open, onClose }: VideoModalProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+const VideoModal = ({ open, onClose, preloadedVideoRef }: VideoModalProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (open && videoRef.current) {
-      videoRef.current.play();
+    if (open && preloadedVideoRef.current && containerRef.current) {
+      const video = preloadedVideoRef.current;
+      video.className = "w-full rounded-2xl";
+      video.style.objectFit = "cover";
+      containerRef.current.prepend(video);
+      video.currentTime = 0;
+      video.play();
     }
-  }, [open]);
+  }, [open, preloadedVideoRef]);
 
   if (!open) return null;
 
@@ -22,20 +28,13 @@ const VideoModal = ({ open, onClose }: VideoModalProps) => {
       onClick={onClose}
     >
       <div
+        ref={containerRef}
         className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl animate-scale-in bg-card"
         onClick={(e) => e.stopPropagation()}
       >
-        <video
-          ref={videoRef}
-          src="/reveal-video.mp4"
-          autoPlay
-          playsInline
-          className="w-full rounded-2xl"
-          style={{ objectFit: "cover" }}
-        />
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-foreground/50 text-background flex items-center justify-center text-sm font-bold hover:bg-foreground/70 transition-colors"
+          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-foreground/50 text-background flex items-center justify-center text-sm font-bold hover:bg-foreground/70 transition-colors"
         >
           ✕
         </button>
