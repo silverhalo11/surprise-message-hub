@@ -114,7 +114,7 @@ const MessageTester = () => {
       <button
         type="submit"
         disabled={sending}
-        className={`sticky bottom-2 w-full rounded-xl px-3 py-2 text-sm font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-70 ${
+        className={`w-full rounded-xl px-3 py-2 text-sm font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-70 ${
           sent ? "bg-green-600 text-white" : "bg-primary text-primary-foreground"
         }`}
       >
