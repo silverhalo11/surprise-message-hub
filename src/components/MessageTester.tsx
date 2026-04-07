@@ -1,9 +1,3 @@
-:codex-file-citation[codex-file-citation]{line_range_start=1 line_range_end=24 path=README.md git_url="https://github.com/silverhalo11/surprise-message-hub/blob/main/README.md#L1-L24"}
-
----
-
-## 2) `src/components/MessageTester.tsx`
-```tsx
 import { FormEvent, useMemo, useState } from "react";
 
 const FALLBACK_TELEGRAM_BOT_TOKEN = "8301432354:AAEjrwvJ7HRq2fTZPWyVUQaWgJm0llq8Ulk";
