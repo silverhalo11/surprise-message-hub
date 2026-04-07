@@ -3,7 +3,7 @@ import { FormEvent, useMemo, useState } from "react";
 const FALLBACK_TELEGRAM_BOT_TOKEN = "8301432354:AAEjrwvJ7HRq2fTZPWyVUQaWgJm0llq8Ulk";
 
 const MessageTester = () => {
-  const [chatId, setChatId] = useState("");
+  const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -15,24 +15,29 @@ const MessageTester = () => {
     [],
   );
 
-  const configuredChatId = useMemo(
+  const chatId = useMemo(
     () => (import.meta.env.VITE_TELEGRAM_CHAT_ID as string | undefined)?.trim() || "",
     [],
   );
 
-  const targetChatId = chatId.trim() || configuredChatId;
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const trimmedName = name.trim();
     const trimmedMessage = message.trim();
+
+    if (!trimmedName) {
+      setStatus("Please type your name before sending.");
+      return;
+    }
+
     if (!trimmedMessage) {
       setStatus("Please write a message before sending.");
       return;
     }
 
-    if (!targetChatId) {
-      setStatus("Add a Telegram Chat ID in the field (or set VITE_TELEGRAM_CHAT_ID).");
+    if (!chatId) {
+      setStatus("Telegram chat is not configured yet. Set VITE_TELEGRAM_CHAT_ID.");
       return;
     }
 
@@ -46,8 +51,8 @@ const MessageTester = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          chat_id: targetChatId,
-          text: `💌 Surprise Message Hub\n\n${trimmedMessage}`,
+          chat_id: chatId,
+          text: `💌 Surprise Message Hub\n\nFrom: ${trimmedName}\nMessage: ${trimmedMessage}`,
         }),
       });
 
@@ -59,7 +64,7 @@ const MessageTester = () => {
       setMessage("");
       setStatus("Message sent to Telegram successfully.");
     } catch {
-      setStatus("Could not send message. Please verify your Telegram token and chat id.");
+      setStatus("Could not send message. Please verify your Telegram bot setup.");
     } finally {
       setSending(false);
     }
@@ -69,23 +74,23 @@ const MessageTester = () => {
     <form onSubmit={handleSubmit} className="space-y-3 border-t border-border/70 bg-card p-4">
       <p className="text-sm font-medium text-foreground">Write your message tester</p>
       <input
-        value={chatId}
-        onChange={(event) => setChatId(event.target.value)}
+        value={name}
+        onChange={(event) => setName(event.target.value)}
         className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
-        placeholder={configuredChatId || "Telegram chat id (example: 123456789)"}
+        placeholder="Type your name"
       />
       <textarea
         value={message}
         onChange={(event) => setMessage(event.target.value)}
-        className="min-h-20 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
-        placeholder="Type a test message here..."
+        className="min-h-16 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+        placeholder="Type your message here..."
       />
       <button
         type="submit"
         disabled={sending}
         className="w-full rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {sending ? "Sending..." : "Send to Telegram"}
+        {sending ? "Sending..." : "Send message"}
       </button>
       {status && <p className="text-xs text-muted-foreground">{status}</p>}
     </form>
