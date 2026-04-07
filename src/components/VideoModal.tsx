@@ -1,14 +1,35 @@
+import { useEffect, useRef } from "react";
+
 interface VideoModalProps {
   open: boolean;
   onClose: () => void;
 }
 
 const VideoModal = ({ open, onClose }: VideoModalProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (!open || !videoRef.current) return;
+
+    const video = videoRef.current;
+    video.currentTime = 0;
+
+    const playVideo = async () => {
+      try {
+        await video.play();
+      } catch {
+        // Ignore autoplay interruptions after mount.
+      }
+    };
+
+    void playVideo();
+  }, [open]);
+
   if (!open) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 backdrop-blur-sm animate-fade-in px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 px-4 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -16,9 +37,8 @@ const VideoModal = ({ open, onClose }: VideoModalProps) => {
         onClick={(e) => e.stopPropagation()}
       >
         <video
+          ref={videoRef}
           src="/reveal-video-mobile.mp4"
-          autoPlay
-          muted={false}
           playsInline
           preload="auto"
           className="block w-full"
